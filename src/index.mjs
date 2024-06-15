@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { text } from 'express';
 
 const app = express();
 
@@ -59,9 +59,21 @@ app.get("/api/users", (request, response) => {
     response.send(mockData);
 });
 
-// to get user by id
+// to get user by id (using request params)
 app.get("/api/users/:id", (request, response) => {
-    console.log(request.params);
+    // console.log(request.params);
+    const userID = parseInt(request.params.id);
+    console.log(userID);
+    if (isNaN(userID)) {
+        response.status(400)
+            .send({
+            message: "Bad Request, Invalid user ID",
+        });
+        return;
+    }
+    const user = mockData.find((user) => user.id === userID);
+    if (!user) return response.status(404).send(`<h3>User with ID ${userID} not found</h3>`);
+    response.send(user);
 });
 
 // to get list of items
