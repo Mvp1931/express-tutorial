@@ -1,4 +1,4 @@
-import express, { text } from 'express';
+import express, { text } from "express";
 
 const app = express();
 
@@ -44,12 +44,11 @@ const mockItems = [
         item: "bananas",
     },
 ];
-
 // set up routes
 // main route
-app.get('/', (request, response) => {
+app.get("/", (request, response) => {
     response.status(200).send({
-        message : "hello from express",
+        message: "hello from express",
     });
 });
 
@@ -65,8 +64,7 @@ app.get("/api/users/:id", (request, response) => {
     const userID = parseInt(request.params.id);
     console.log(userID);
     if (isNaN(userID)) {
-        response.status(400)
-            .send({
+        response.status(400).send({
             message: "Bad Request, Invalid user ID",
         });
         return;
@@ -75,13 +73,11 @@ app.get("/api/users/:id", (request, response) => {
     if (!user) return response.status(404).send(`<h3>User with ID ${userID} not found</h3>`);
     response.send(user);
 });
-
 // to get list of items
 app.get("/api/items", (request, response) => {
     response.send(mockItems);
 });
 
-
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
