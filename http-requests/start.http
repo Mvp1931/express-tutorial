@@ -1,0 +1,7 @@
+# run this file for http requests
+
+
+GET http://localhost:3000/api/users
+
+### Post Requests
+POST http://localhost:3000/api/users
