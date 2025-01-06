@@ -197,6 +197,27 @@ app.patch("/api/users/:id", (request, response) => {
     return response.sendStatus(200);
 });
 
+// delete Requests
+app.delete("/api/users/:id", (request, response) => {
+    const {
+        params: { id },
+    } = request;
+    const parsedID = parseInt(id);
+
+    if (isNaN(parsedID)) {
+        return response.status(400).send({
+            message: "Bad Request, Invalid user ID",
+        });
+    }
+    const findUserIndex = mockData.findIndex((user) => user.id === parsedID);
+
+    if (findUserIndex === -1) {
+        return response.sendStatus(404);
+    }
+    mockData.splice(findUserIndex, 1);
+    return response.sendStatus(200);
+});
+
 // server listening on port 3000
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
