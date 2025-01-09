@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 import routes from "./routes/index.js";
 
@@ -17,15 +18,21 @@ const loggingMiddleware = (request, response, next) => {
 };
 app.use(loggingMiddleware);
 
+app.use(cookieParser("helloExpress"));
+
+// set up routes
+app.use(routes);
+
 // main route
 app.get("/", (request, response) => {
+    response.cookie("hello", "Express", {
+        maxAge: 1000 * 60 * 60, // cookie will expire in 60 minutes
+        signed: true, // cookie will be signed
+    });
     response.status(200).send({
         message: "hello from express",
     });
 });
-
-// set up routes
-app.use(routes);
 
 // to get list of items
 // server listening on port 3000
