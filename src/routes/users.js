@@ -9,6 +9,17 @@ const usersRouter = Router();
 
 //get request
 usersRouter.get("/api/users", checkSchema(getUserValidationSchema), (request, response) => {
+    // get session information
+    console.log(request.session);
+    console.log(request.session.id);
+
+    request.sessionStore.get(request.session.id, (error, sessionData) => {
+        if (error) {
+            return response.send(error);
+        }
+        console.log(sessionData);
+    });
+
     const result = validationResult(request);
     console.log(result);
 

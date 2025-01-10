@@ -6,10 +6,6 @@ const itemsRouter = Router();
 
 // to get list of items
 itemsRouter.get("/api/items", (request, response) => {
-    console.log(request.headers.cookie);
-
-    console.log(request.signedCookies.hello); // cookies that are signed
-
     if (request.signedCookies.hello && request.signedCookies.hello === "Express") {
         return response.send(mockItems);
     }
