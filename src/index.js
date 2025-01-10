@@ -5,6 +5,7 @@ import passport from "passport";
 
 import { mockData } from "./utils/data.js";
 import routes from "./routes/index.js";
+import "./strategies/local-strategy.js";
 
 // start express server
 const app = express();
@@ -24,6 +25,9 @@ app.use(
     }),
 ); // parses incoming signed cookies
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 // NOTE: All middlewares must be declared before their respective routes
 // set up middlware logging
 
@@ -32,9 +36,6 @@ const loggingMiddleware = (request, response, next) => {
     next();
 };
 app.use(loggingMiddleware);
-
-// set up routes
-app.use(routes); // <-- Routes from routes/index.js file
 
 // main route
 app.get("/", (request, response) => {
@@ -52,32 +53,56 @@ app.get("/", (request, response) => {
     });
 });
 
+// set up routes
+app.use(routes); // <-- Routes from routes/index.js file
+
 // authentication middleware
-app.post("/api/auth", (request, response) => {
-    console.log(request.session.id);
-    const {
-        body: { displayName, password },
-    } = request;
-    const findUser = mockData.find((user) => user.displayName === displayName);
-
-    if (!findUser || findUser.password !== password)
-        return response.status(401).send({ message: "Invalid Credentials" });
-
-    request.session.user = findUser;
-    return response.status(200).send(findUser);
+app.post("/api/auth", passport.authenticate("local"), (request, response) => {
+    console.log(request.session);
+    response.sendStatus(200).send(request.session.user);
 });
 
 app.get("/api/auth/status", (request, response) => {
-    console.log(request.session.id);
-    console.log(request.session.user);
+    console.log(request.session);
 
-    request.sessionStore.get(request.sessionID, (error, session) => {
-        console.log(session);
-    });
-    return request.session.user
-        ? response.status(200).send(request.session.user)
-        : response.status(401).send({ message: "Not Logged In, Bad Credentials" });
+    return request.user
+        ? response.send(request.user)
+        : response.status(401).send({ message: "Not Logged In, Wrone Credentials..." });
 });
+
+app.post("/api/auth/logout", (request, response) => {
+    if (!request.user) return response.status(401).send({ message: "User Not logged in..." });
+    request.logOut((error) => {
+        if (error) return response.status(400).send({ message: "Error Logging Out..." });
+        return response.sendStatus(200);
+    });
+});
+
+// app.post("/api/auth", (request, response) => {
+//     console.log(request.session.id);
+//     const {
+//         body: { displayName, password },
+//     } = request;
+//     const findUser = mockData.find((user) => user.displayName === displayName);
+
+//     if (!findUser || findUser.password !== password)
+//         return response.status(401).send({ message: "Invalid Credentials" });
+
+//     request.session.user = findUser;
+//     return response.status(200).send(findUser);
+// });
+
+// app.get("/api/auth/status", (request, response) => {
+//     console.log(request.session.id);
+//     console.log(request.session.user);
+
+//     request.sessionStore.get(request.sessionID, (error, session) => {
+//         console.log(session);
+//     });
+//     return request.session.user
+//         ? response.status(200).send(request.session.user)
+//         : response.status(401).send({ message: "Not Logged In, Bad Credentials" });
+// });
 
 app.post("/api/cart", (request, response) => {
     if (!request.session.user) {
