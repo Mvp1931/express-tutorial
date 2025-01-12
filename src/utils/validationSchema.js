@@ -29,6 +29,11 @@ export const createUserValidataonSchema = {
             errorMessage: "Display name must be between 3 and 10 characters",
         },
     },
+    password: {
+        notEmpty: {
+            errorMessage: "Password is required",
+        },
+    },
 };
 
 export const getUserValidationSchema = {

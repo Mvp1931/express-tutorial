@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
+import mongoose from "mongoose";
 
 import { mockData } from "./utils/data.js";
 import routes from "./routes/index.js";
@@ -10,6 +11,11 @@ import "./strategies/local-strategy.js";
 // start express server
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+mongoose
+    .connect("mongodb://localhost:27017/express_tutorial")
+    .then(() => console.log("Connected to mongodb database."))
+    .catch((error) => console.error(`Error connecting to mongodb database: ${error}`));
 
 app.use(express.json()); // parses incoming json
 
@@ -77,32 +83,6 @@ app.post("/api/auth/logout", (request, response) => {
         return response.sendStatus(200);
     });
 });
-
-// app.post("/api/auth", (request, response) => {
-//     console.log(request.session.id);
-//     const {
-//         body: { displayName, password },
-//     } = request;
-//     const findUser = mockData.find((user) => user.displayName === displayName);
-
-//     if (!findUser || findUser.password !== password)
-//         return response.status(401).send({ message: "Invalid Credentials" });
-
-//     request.session.user = findUser;
-//     return response.status(200).send(findUser);
-// });
-
-// app.get("/api/auth/status", (request, response) => {
-//     console.log(request.session.id);
-//     console.log(request.session.user);
-
-//     request.sessionStore.get(request.sessionID, (error, session) => {
-//         console.log(session);
-//     });
-//     return request.session.user
-//         ? response.status(200).send(request.session.user)
-//         : response.status(401).send({ message: "Not Logged In, Bad Credentials" });
-// });
 
 app.post("/api/cart", (request, response) => {
     if (!request.session.user) {

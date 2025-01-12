@@ -2,13 +2,16 @@ import { Router } from "express";
 import { checkSchema, matchedData, validationResult } from "express-validator";
 
 import { mockData } from "../utils/data.js";
+import { User } from "../mongoose/schemas/user.js";
 import { resolveIndexByUserID } from "../utils/middleware.js";
 import { getUserValidationSchema, createUserValidataonSchema } from "../utils/validationSchema.js";
 
 const usersRouter = Router();
 
 //get request
-usersRouter.get("/api/users", checkSchema(getUserValidationSchema), (request, response) => {
+usersRouter.get("/api/users", checkSchema(getUserValidationSchema), async (request, response) => {
+    // get session information
+    //
     // get session information
     console.log(request.session);
     console.log(request.session.id);
@@ -30,6 +33,7 @@ usersRouter.get("/api/users", checkSchema(getUserValidationSchema), (request, re
         return response.send(mockData.filter((user) => user[filter].includes(value)));
     }
     response.send(mockData);
+    //
 });
 
 //get user by id
@@ -41,22 +45,30 @@ usersRouter.get("/api/users/:id", resolveIndexByUserID, (request, response) => {
 });
 
 //post request
-usersRouter.post("/api/users", checkSchema(createUserValidataonSchema), (request, response) => {
+usersRouter.post("/api/users", checkSchema(createUserValidataonSchema), async (request, response) => {
     const result = validationResult(request);
-    console.log(result);
-
+    // console.log(result);
     if (!result.isEmpty()) {
         return response.status(400).send({ errors: result.array() });
     }
     const data = matchedData(request);
 
-    const newUser = {
-        id: mockData[mockData.length - 1].id + 1,
-        ...data,
-    };
+    // const newUser = {
+    //     id: mockData[mockData.length - 1].id + 1,
+    //     ...data,
+    // };
+    console.log(data);
+    // mockData.push(newUser);
+    // return response.status(201).send(newUser);
 
-    mockData.push(newUser);
-    return response.status(201).send(newUser);
+    const newUser = new User(data);
+    try {
+        const savedUser = await newUser.save();
+        return response.status(201).send(savedUser);
+    } catch (error) {
+        console.error(`error occured: ${error}`);
+        return response.status(400).send(error);
+    }
 });
 
 // Put Request
