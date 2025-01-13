@@ -5,6 +5,7 @@ import { mockData } from "../utils/data.js";
 import { User } from "../mongoose/schemas/user.js";
 import { resolveIndexByUserID } from "../utils/middleware.js";
 import { getUserValidationSchema, createUserValidataonSchema } from "../utils/validationSchema.js";
+import { hashPassword } from "../utils/helper.js";
 
 const usersRouter = Router();
 
@@ -60,6 +61,8 @@ usersRouter.post("/api/users", checkSchema(createUserValidataonSchema), async (r
     console.log(data);
     // mockData.push(newUser);
     // return response.status(201).send(newUser);
+    data.password = hashPassword(data.password);
+    console.log(data);
 
     const newUser = new User(data);
     try {

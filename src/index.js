@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
 import mongoose from "mongoose";
+import MongoStore from "connect-mongo";
 
 import { mockData } from "./utils/data.js";
 import routes from "./routes/index.js";
@@ -28,6 +29,9 @@ app.use(
         cookie: {
             maxAge: 1000 * 60 * 60 * 24, // cookie will expire in 24 hours
         },
+        store: MongoStore.create({
+            client: mongoose.connection.getClient(),
+        }),
     }),
 ); // parses incoming signed cookies
 
@@ -69,7 +73,7 @@ app.post("/api/auth", passport.authenticate("local"), (request, response) => {
 });
 
 app.get("/api/auth/status", (request, response) => {
-    console.log(request.session);
+    console.log(request.sessionID);
 
     return request.user
         ? response.send(request.user)
